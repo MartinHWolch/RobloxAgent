@@ -1,0 +1,145 @@
+{
+  "meta": {
+    "category": "code",
+    "subcategory": "github_repos",
+    "count": 8,
+    "updated": "2026-06-28T19:54:55.302934"
+  },
+  "items": [
+    {
+      "title": "Sleitnick/Knit",
+      "url": "https://github.com/Sleitnick/Knit",
+      "owner": "Sleitnick",
+      "repo": "Knit",
+      "description": "Lightweight game framework for Roblox",
+      "stars": 624,
+      "language": "Luau",
+      "topics": [
+        "framework",
+        "game",
+        "library",
+        "lua",
+        "luau",
+        "roblox"
+      ],
+      "license": "MIT",
+      "readme": "[![Release](https://github.com/Sleitnick/Knit/actions/workflows/release.yaml/badge.svg)](https://github.com/Sleitnick/Knit/actions/workflows/release.yaml)\n[![CI](https://github.com/Sleitnick/Knit/actions/workflows/ci.yaml/badge.svg)](https://github.com/Sleitnick/Knit/actions/workflows/ci.yaml)\n[![Docs](https://github.com/Sleitnick/Knit/actions/workflows/docs.yaml/badge.svg)](https://github.com/Sleitnick/Knit/actions/workflows/docs.yaml)\n\n## :warning: No Longer Maintained :warning:\n\nKnit has been archived and will no longer receive updates.\n\nPlease [read here](/ARCHIVAL.md) for more information.\n\n# Knit\n\nKnit is a lightweight framework for Roblox that simplifies communication between core parts of your game and seamlessly bridges the gap between the server and the client.\n\nRead the [documentation](https://sleitnick.github.io/Knit/) for more info.\n\n## Install\n\nInstalling Knit is very simple. Just drop the module into ReplicatedStorage. Knit can also be used within a Rojo project.\n\n**Roblox Studio workflow:**\n\n1. Get [Knit](https://www.roblox.com/library/5530714855/Knit) from the Roblox library.\n1. Place Knit directly within ReplicatedStorage.\n\n**Wally & Rojo workflow:**\n\n1. Add Knit as a Wally dependency (e.g. `Knit = \"sleitnick/knit@^1\"`)\n1. Use Rojo to point the Wally packages to ReplicatedStorage.\n\n## Basic Usage\n\nThe core usage of Knit is the same from the server and the client. The general pattern is to create a single script on the server and a single script on the client. These scripts will load Knit, create services/controllers, and then start Knit.\n\nThe most basic usage would look as such:\n\n```lua\nlocal Knit = require(game:GetService(\"ReplicatedStorage\").Packages.Knit)\n\nKnit.Start():catch(warn)\n-- Knit.Start() returns a Promise, so we are catching any errors and feeding it to the built-in 'warn' function\n-- You could also chain 'await()' to the end to yield until the whole sequence is completed:\n--    Knit.Start():catch(warn):await()\n```\n\nThat would be the necessary code on both the server and the client. However, nothing interesting is going to happen. Let's dive into some more examples.\n\n### A Simple Service\n\nA service is simply a structure that _serves_ some specific purpose. For instance, a game might have a MoneyService, which manages in-game currency for players. Let's look at a simple example:\n\n```lua\nlocal Knit = require(game:GetService(\"ReplicatedStorage\").Packages.Knit)\n\n-- Create the service:\nlocal MoneyService = Knit.CreateService {\n\tName = \"MoneyService\",\n}\n\n-- Add some methods to the service:\n\nfunction MoneyService:GetMoney(player)\n\t-- Do some sort of data fetch\n\tlocal money = someDataStore:GetAsync(\"money\")\n\treturn money\nend\n\nfunction MoneyService:GiveMoney(player, amount)\n\t-- Do some sort of data fetch\n\tlocal money = self:GetMoney(player)\n\tmoney += amount\n\tsomeDataStore:SetAsync(\"money\", money)\nend\n\nKnit.Start():catch(warn)\n```\n\nNow we have a little MoneyService that can get and give money to a player. However, only the server can use this at the moment. What if we want clients to fetch how much money they have? To do this, we have to create some client-side code to consume our service. We _could_ create a controller, but it's not necessary for this example.\n\nFirst, we need to expose a method to the client. We can do this by writing methods on the service's Client table:\n\n```lua\n-- Money service on the server\n...\nfunction MoneyService.Client:GetMoney(player)\n\t-- We already wrote this method, so we can just call the other one.\n\t-- 'self.Server' will reference back to the root MoneyService.\n\treturn self.Server:GetMoney(player)\nend\n...\n```\n\nWe can write client-side code to fetch money from the service:\n\n```lua\n-- Client-side code\nlocal Knit = require(game:GetService(\"ReplicatedStorage\").Packages.Knit)\nKnit.Start():catch(warn):await()\n\nlocal MoneyService = Knit.GetService(\"MoneyService\")\n\nMoneyService:GetMoney():andThen(function(money)\n\tprint(money)\nend)\n```\n\nUnder the hood, Knit is creating a RemoteFunction bound to the service's GetMoney method. Knit keeps RemoteFunctions and RemoteEvents out of the way so that developers can focus on writing code and not building networking infrastructure.\n",
+      "source": "github"
+    },
+    {
+      "title": "Roblox/react-luau",
+      "url": "https://github.com/Roblox/react-luau",
+      "owner": "Roblox",
+      "repo": "react-luau",
+      "description": "A comprehensive, but not exhaustive, translation of ReactJS 17.x into Luau. This is a read-only mirror.",
+      "stars": 526,
+      "language": "Luau",
+      "topics": [],
+      "license": "MIT",
+      "readme": "<p align=\"center\">\n  <p align=\"center\">\n\t<img width=\"124\" height=\"124\" src=\"./assets/logo.svg\" alt=\"Logo\">\n  </p>\n  <h1 align=\"center\"><a href=\"https://www.react-luau.dev\"><b>React Luau</b></a></h1>\n  <p align=\"center\">\n    A comprehensive, but not exhaustive, translation of ReactJS 17.x into <a href=\"https://luau.org\">Luau</a>.\n\t<!-- <br> -->\n\t<!-- Shields -->\n\t<!-- <a href=\"https://github.com/roblox/react-lua/blob/main/LICENSE\">\n      <img src=\"https://img.shields.io/badge/license-MIT-blue.svg\" alt=\"License\">\n    </a>\n    <a href=\"https://github.com/Roblox/roact-alignment/actions/workflows/test.yml\">\n      <img src=\"https://github.com/Roblox/roact-alignment/actions/workflows/test.yml/badge.svg?branch=main\" alt=\"Build Status\">\n    </a>\n    <a href=\"https://coveralls.io/github/Roblox/roact-alignment?branch=master\">\n      <img src=\"https://coveralls.io/repos/github/Roblox/roact-alignment/badge.svg?branch=master&t=TvTSze\" alt=\"Coverage Status\">\n    </a> -->\n  </p>\n</p>\n\n<div align=\"center\">\n\n[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/roblox/react-lua/blob/main/LICENSE)\n[![Tests](https://github.com/Roblox/roact-alignment/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/Roblox/roact-alignment/actions/workflows/test.yml) \n[![Coverage Status](https://coveralls.io/repos/github/Roblox/roact-alignment/badge.svg?branch=master&t=TvTSze)](https://coveralls.io/github/Roblox/roact-alignment?branch=master)\n\n</div>\n\nReact Luau is a declarative library for building user interfaces. It's a highly-tuned translation of ReactJS and currently based on React 17.\n\n* **Declarative:** React makes it easy to create interactive UIs. Design simple views for each state in your application, and React will efficiently update and render just the right components when your data changes. Declarative views make your code more predictable, simpler to understand, and easier to debug.\n* **Component-Based:** Build encapsulated components that manage their own state, then compose them to make complex UIs. Since component logic is written in Luau instead of managed with Roblox's Instances, you can easily pass rich data through your code and keep the state out of the data model.\n* **Tuned for Roblox:** Luau is not Javascript, so we deviate from ReactJS in certain places for a more ergonomic programming experience in Luau and with Roblox's wider programming model. For example, React Luau introduces Bindings, a form of signals-based state that doesn't re-render, for highly-efficient animations driven by React.\n\n[Learn how to use React Luau in your project](https://www.react-luau.dev/).\n\n<!-- ## Installation\n\nReact Luau has been designed for gradual adoption from the start, and **you can use as little or as much React as you need**:\n\n- Use [Quick Start](https://www.react-luau.dev/) to get a taste of React.\n- [Add React to an Existing Project](https://www.react-luau.dev/) to use as little or as much React as you need.\n\n## Documentation\n\nYou can find the React Luau documentation [on the website](https://www.react-luau.dev/).\n\nCheck out the [Getting Started](https://www.react-luau.dev/) page for a quick overview.\n\nThe documentation is divided into several sections:\n\n- TODO -->\n\n## Examples\n\nWe have several examples [on the website](https://www.react-luau.dev/). Here is the first one to get you started:\n\n```luau\nlocal React = require(Packages.React)\nlocal ReactRoblox = require(Packages.ReactRoblox)\n\nlocal e = React.createElement\n\nlocal function HelloMessage(props: {\n\tname: string,\n})\n\treturn e(\"TextLabel\", {\n\t\tAnchorPoint = Vector2.new(0.5, 0.5),\n\t\tPosition = UDim2.fromScale(0.5, 0.5),\n\t\tAutomaticSize = Enum.AutomaticSize.XY,\n\t\tText = `Hello, {props.name}!`,\n\t})\nend\n\nlocal function App()\n\treturn e(\"ScreenGui\", {}, {\n\t\tMyMessage = e(HelloMessage, {\n\t\t\tname = \"Taylor\",\n\t\t}),\n\t})\nend\n\nlocal root = ReactRoblox.createRoot(Instance.new(\"Folder\"))\nroot:render(ReactRoblox.createPortal(e(App), Players.LocalPlayer.PlayerGui))\n```\n\nThis example will render \"Hello, Taylor!\" into a TextLabel on the screen.\n\n<!-- ## Contributing -->\n\n### License\n\nReact Luau is [MIT licensed](./LICENSE). Go do cool stuff with it!\n",
+      "source": "github"
+    },
+    {
+      "title": "dphfox/Fusion",
+      "url": "https://github.com/dphfox/Fusion",
+      "owner": "dphfox",
+      "repo": "Fusion",
+      "description": "Futuristic Luau for every universe.",
+      "stars": 775,
+      "language": "Luau",
+      "topics": [
+        "animation",
+        "declarative",
+        "luau",
+        "reactive",
+        "roblox",
+        "state-management",
+        "ui"
+      ],
+      "license": "MIT",
+      "readme": "<img align=\"left\" src=\"./gh-assets/logo-dark-theme.svg#gh-dark-mode-only\" alt=\"Fusion\"><img align=\"left\" src=\"./gh-assets/logo-light-theme.svg#gh-light-mode-only\" alt=\"Fusion\"><a href=\"https://elttob.uk/Fusion/latest\"><img align=\"right\" src=\"./gh-assets/link-docs.svg\" alt=\"Docs\"></a><a href=\"https://github.com/Elttob/Fusion/releases\"><img align=\"right\" src=\"./gh-assets/link-download.svg\" alt=\"Download\"></a><img src=\"./gh-assets/clearfloat.svg\">\n\n### Futuristic Luau for every universe.\n\nFusion is a portable Luau companion library for simpler, more descriptive code.\n\nWith Fusion, assemble straightforward chains of logic that are easy to understand,\npredict and debug. Make strong guarantees about what your code will or won't do.\nBuild joyfully custom-fitted APIs to interact with the world outside of your code.\n\nFusion provides batteries-included configuration for Roblox, and fantastic extensibility\nand integration for anything else Luau.\n\nPiqued your interest? [Get going in minutes with our on-rails tutorial.](https://elttob.uk/Fusion/latest/tutorials)\n\n## License\n\nFusion is licensed freely under MIT. Go do cool stuff with it, and if you feel\nlike it, give us a shoutout!\n",
+      "source": "github"
+    },
+    {
+      "title": "evaera/matter",
+      "url": "https://github.com/evaera/matter",
+      "owner": "evaera",
+      "repo": "matter",
+      "description": "A modern ECS library for Roblox.",
+      "stars": 141,
+      "language": "Lua",
+      "topics": [
+        "ecs",
+        "roblox"
+      ],
+      "license": "MIT",
+      "readme": "<div align=\"center\">\n\t<img src=\".moonwave/static/logo.svg\" alt=\"Matter\" width=\"600\" />\n\t<br><br><br>\n\t<p>A modern ECS library for Roblox</p>\n  \n  <p>This repository is no longer maintained. A community fork contintues development:</p>\n\t<a href=\"https://github.com/matter-ecs/matter\"><strong>Take me to matter-ecs &rarr;</strong></a>\n  <br><br><br><br><br><br>\n\n  Originally made by [@lpghatguy](https://github.com/lpghatguy) and [@evaera](https://github.com/evaera) ❤️\n</div>\n",
+      "source": "github"
+    },
+    {
+      "title": "evaera/roblox-lua-promise",
+      "url": "https://github.com/evaera/roblox-lua-promise",
+      "owner": "evaera",
+      "repo": "roblox-lua-promise",
+      "description": "Promise implementation for Roblox",
+      "stars": 346,
+      "language": "Lua",
+      "topics": [
+        "lua",
+        "roblox"
+      ],
+      "license": "MIT",
+      "readme": "<div align=\"center\">\n\t<h1>Roblox Lua Promise</h1>\n\t<p>An implementation of <code>Promise</code> similar to Promise/A+.</p>\n\t<a href=\"https://eryn.io/roblox-lua-promise/\"><strong>View docs</strong></a>\n</div>\n<!--moonwave-hide-before-this-line-->\n\n\n## Why you should use Promises\n\nThe way Roblox models asynchronous operations by default is by yielding (stopping) the thread and then resuming it when the future value is available. This model is not ideal because:\n\n- Functions you call can yield without warning, or only yield sometimes, leading to unpredictable and surprising results. Accidentally yielding the thread is the source of a large class of bugs and race conditions that Roblox developers run into.\n- It is difficult to deal with running multiple asynchronous operations concurrently and then retrieve all of their values at the end without extraneous machinery.\n- When an asynchronous operation fails or an error is encountered, Lua functions usually either raise an error or return a success value followed by the actual value. Both of these methods lead to repeating the same tired patterns many times over for checking if the operation was successful.\n- Yielding lacks easy access to introspection and the ability to cancel an operation if the value is no longer needed.\n\nThis Promise implementation attempts to satisfy these traits:\n\n* An object that represents a unit of asynchronous work\n* Composability\n* Predictable timing\n",
+      "source": "github"
+    },
+    {
+      "title": "Roblox/roact",
+      "url": "https://github.com/Roblox/roact",
+      "owner": "Roblox",
+      "repo": "roact",
+      "description": "A view management library for Roblox Lua similar to React",
+      "stars": 624,
+      "language": "Lua",
+      "topics": [
+        "lua",
+        "react",
+        "roblox",
+        "ui"
+      ],
+      "license": "Apache-2.0",
+      "readme": "> This repository is deprecated and no longer maintained.\n> \n> See [react-lua](https://github.com/Roblox/react-lua) for our currently maintained React in Lua library.\n\n<h1 align=\"center\">Roact</h1>\n<div align=\"center\">\n\t<a href=\"https://github.com/Roblox/roact/actions\"><img src=\"https://github.com/Roblox/roact/workflows/CI/badge.svg\" alt=\"GitHub Actions Build Status\" /></a>\n\t<a href=\"https://coveralls.io/github/Roblox/roact?branch=master\"><img src=\"https://coveralls.io/repos/github/Roblox/roact/badge.svg?branch=master\" alt=\"Coveralls Coverage\" /></a>\n\t<a href=\"https://roblox.github.io/roact\"><img src=\"https://img.shields.io/badge/docs-website-green.svg\" alt=\"Documentation\" /></a>\n</div>\n\n<div align=\"center\">\n\tA declarative UI library for Roblox Lua inspired by <a href=\"https://reactjs.org\">React</a>.\n</div>\n\n<div>&nbsp;</div>\n\n## Installation\n\n### Method 1: Model File (Roblox Studio)\n* Download the `rbxm` model file attached to the latest release from the [GitHub releases page](https://github.com/Roblox/Roact/releases).\n* Insert the model into Studio into a place like `ReplicatedStorage`\n\n### Method 2: Filesystem\n* Copy the `src` directory into your codebase\n* Rename the folder to `Roact`\n* Use a plugin like [Rojo](https://github.com/LPGhatguy/rojo) to sync the files into a place\n\n## [Documentation](https://roblox.github.io/roact)\nFor a detailed guide and examples, check out [the official Roact documentation](https://roblox.github.io/roact).\n\n```lua\nlocal LocalPlayer = game:GetService(\"Players\").LocalPlayer\n\nlocal Roact = require(Roact)\n\n-- Create our virtual tree describing a full-screen text label.\nlocal tree = Roact.createElement(\"ScreenGui\", {}, {\n\tLabel = Roact.createElement(\"TextLabel\", {\n\t\tText = \"Hello, world!\",\n\t\tSize = UDim2.new(1, 0, 1, 0),\n\t}),\n})\n\n-- Turn our virtual tree into real instances and put them in PlayerGui\nRoact.mount(tree, LocalPlayer.PlayerGui, \"HelloWorld\")\n```\n\n## License\nRoact is available under the Apache 2.0 license. See [LICENSE.txt](LICENSE.txt) for details.",
+      "source": "github"
+    },
+    {
+      "title": "Roblox/rodux",
+      "url": "https://github.com/Roblox/rodux",
+      "owner": "Roblox",
+      "repo": "rodux",
+      "description": "A state management library for Roblox Lua inspired by Redux",
+      "stars": 330,
+      "language": "Lua",
+      "topics": [
+        "lua",
+        "redux",
+        "roblox",
+        "state"
+      ],
+      "license": "Apache-2.0",
+      "readme": "<h1 align=\"center\">Rodux</h1>\n<div align=\"center\">\n\t<a href=\"https://github.com/Roblox/rodux/actions\">\n\t\t<img src=\"https://github.com/Roblox/rodux/workflows/CI/badge.svg\" alt=\"GitHub Actions Build Status\" />\n\t</a>\n\t<a href=\"https://coveralls.io/github/Roblox/rodux?branch=master\">\n\t\t<img src=\"https://coveralls.io/repos/github/Roblox/rodux/badge.svg?branch=master\" alt=\"Coveralls Coverage\" />\n\t</a>\n\t<a href=\"https://roblox.github.io/rodux\">\n\t\t<img src=\"https://img.shields.io/badge/docs-website-green.svg\" alt=\"Documentation\" />\n\t</a>\n</div>\n\n<div align=\"center\">\n\tA state management library for Roblox Lua inspired by <a href=\"https://redux.js.org\">Redux</a>.\n</div>\n\n<div>&nbsp;</div>\n\n## Installation\n\n### Method 1: Model File (Roblox Studio)\n* Download the `rbxm` model file attached to the latest release from the [GitHub releases page](https://github.com/Roblox/rodux/releases).\n* Insert the model into Studio into a place like `ReplicatedStorage`\n\n### Method 2: Filesystem\n* Copy the `src` directory into your codebase\n* Rename the folder to `Rodux`\n* Use a plugin like [Rojo](https://github.com/LPGhatguy/rojo) to sync the files into a place\n\n## Usage\nRodux works just like [Redux](https://redux.js.org)'s base API.\n\nSee the official [Rodux Documentation](https://roblox.github.io/rodux/) for more details.\n\n```lua\nlocal Rodux = require(script.Parent.Rodux)\n\nlocal function reducer(state, action)\n\tstate = state or {\n\t\tfrobulations = 0,\n\t}\n\n\tif action.type == \"frobulate\" then\n\t\treturn {\n\t\t\tfrobulations = state.frobulations + 1,\n\t\t}\n\tend\n\n\treturn state\nend\n\nlocal store = Rodux.Store.new(reducer)\n\nstore:getState() -- { frobulations = 0 }\n\nstore:dispatch({\n\ttype = \"frobulate\",\n})\n\nstore:getState() -- { frobulations = 1 }\n```\n\n## Contributing\nContributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for information.\n\n## License\nRodux is available under the Apache 2.0 license. See [LICENSE](LICENSE) for details.\n",
+      "source": "github"
+    },
+    {
+      "title": "Roblox/testez",
+      "url": "https://github.com/Roblox/testez",
+      "owner": "Roblox",
+      "repo": "testez",
+      "description": "BDD-style test and assertion library for Roblox Lua",
+      "stars": 210,
+      "language": "Lua",
+      "topics": [],
+      "license": "Apache-2.0",
+      "readme": "<h1 align=\"center\">TestEZ</h1>\n<div align=\"center\">\n\t<a href=\"https://github.com/Roblox/testez/actions?query=workflow%3ACI\">\n\t\t<img src=\"https://github.com/Roblox/testez/workflows/CI/badge.svg\" alt=\"GitHub Actions Build Status\" />\n\t</a>\n\t<a href=\"https://roblox.github.io/testez\">\n\t\t<img src=\"https://img.shields.io/badge/docs-website-green.svg\" alt=\"Documentation\" />\n\t</a>\n</div>\n\n<div align=\"center\">\n\tBDD-style Roblox Lua testing framework\n</div>\n\n<div>&nbsp;</div>\n\nTestEZ can run within Roblox itself, as well as inside [Lemur](https://github.com/LPGhatguy/Lemur) for testing on CI systems.\n\nWe use TestEZ at Roblox for testing our apps, in-game core scripts, built-in Roblox Studio plugins, as well as libraries like [Roact](https://github.com/Roblox/roact) and [Rodux](https://github.com/Roblox/rodux).\n\nIt provides an API that can run all of your tests with a single method call as well as a more granular API that exposes each step of the pipeline.\n\n## Inspiration and Prior Work\nThe `describe` and `it` syntax in TestEZ is based on the [Behavior-Driven Development](https://en.wikipedia.org/wiki/Behavior-driven_development) methodology, notably as implemented in RSpec (Ruby), busted (Lua), Mocha (JavaScript), and Ginkgo (Go).\n\nThe `expect` syntax is based on Chai, a JavaScript assertion library commonly used with Mocha. Similar expectation systems are also used in RSpec and Ginkgo, with slightly different syntax.\n\n## Contributing\nContributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for information.\n\n## License\nTestEZ is available under the Apache 2.0 license. See [LICENSE](LICENSE) for details.",
+      "source": "github"
+    }
+  ]
+}

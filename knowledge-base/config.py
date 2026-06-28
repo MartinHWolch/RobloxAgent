@@ -24,15 +24,25 @@ DEVFORUM_TOPICS = [
     "optimization-guide-for-large-games",
 ]
 
+DEVFORUM_SEARCH_QUERIES = [
+    "order:likes category:scripting-support",
+    "order:likes category:art-design-support",
+    "order:likes category:tutorials",
+    "order:likes tags:accepted",
+    "roblox game architecture order:likes",
+    "roblox networking best practices order:likes",
+    "roblox datastore order:likes",
+]
+
 GITHUB_REPOS = [
     ("Sleitnick", "Knit"),
-    ("Sleitnick", "Cmdr"),
-    ("Roblox", "react-lua"),
-    ("phuebner", "matter"),
-    ("elihutton", "fusion"),
-    ("littensy", "ProfileStore"),
-    ("evaera", "Promise"),
-    ("evaera", "Maid"),
-    ("Howmanysmall", "Janitor"),
-    ("Campycodes", "Trove"),
+    ("Roblox", "react-luau"),
+    ("dphfox", "Fusion"),
+    ("evaera", "matter"),
+    ("evaera", "roblox-lua-promise"),
+    ("Roblox", "roact"),
+    ("Roblox", "rodux"),
+    ("Roblox", "testez"),
+    ("LPGhatguy", "luajson"),
+    ("1waffler", "ProfileStore"),
 ]

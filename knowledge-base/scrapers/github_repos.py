@@ -1,12 +1,14 @@
 import logging
 from typing import Any
 
-from bs4 import BeautifulSoup
+import requests
 
 from .base import BaseScraper
 from config import GITHUB_REPOS
 
 logger = logging.getLogger(__name__)
+
+GITHUB_API = "https://api.github.com"
 
 
 class GitHubScraper(BaseScraper):
@@ -23,56 +25,41 @@ class GitHubScraper(BaseScraper):
         return results
 
     def _scrape_repo(self, owner: str, repo: str) -> dict[str, Any] | None:
-        url = f"https://github.com/{owner}/{repo}"
-        resp = self._get(url)
-        soup = BeautifulSoup(resp.text, "lxml")
+        repo_data = self._github_api(f"/repos/{owner}/{repo}")
+        if not repo_data:
+            return None
 
-        title = self._clean_text(soup.select_one("h1") or soup.select_one("title"))
-        description_el = soup.select_one("p[class*='description'], [class*='repo-description']")
-        description = self._clean_text(
-            description_el.get_text()) if description_el else ""
-
-        stars = 0
-        star_el = soup.select_one("[class*='star-count'], [id*='star-count']")
-        if star_el:
-            try:
-                stars = int(star_el.get("title", "0").replace(",", ""))
-            except (ValueError, AttributeError):
-                pass
-
-        topics = []
-        for topic_el in soup.select("[class*='topic-tag']"):
-            topics.append(self._clean_text(topic_el.get_text()))
-
-        readme_text = self._scrape_readme(owner, repo)
+        readme_text = self._get_readme(owner, repo)
 
         return {
-            "title": self._clean_text(title.get_text()) if title else repo,
-            "url": url,
+            "title": repo_data.get("full_name", f"{owner}/{repo}"),
+            "url": repo_data.get("html_url", f"https://github.com/{owner}/{repo}"),
             "owner": owner,
             "repo": repo,
-            "description": description,
-            "stars": stars,
-            "topics": topics,
+            "description": repo_data.get("description") or "",
+            "stars": repo_data.get("stargazers_count", 0),
+            "language": repo_data.get("language") or "",
+            "topics": repo_data.get("topics", []),
+            "license": repo_data.get("license", {}).get("spdx_id") if repo_data.get("license") else "",
             "readme": readme_text,
             "source": "github",
         }
 
-    def _scrape_readme(self, owner: str, repo: str) -> str:
-        readme_url = f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.md"
-        try:
-            resp = self.session.get(readme_url, timeout=10)
-            if resp.status_code == 200:
-                return resp.text[:5000]
-        except Exception:
-            pass
+    def _github_api(self, path: str) -> dict | None:
+        url = f"{GITHUB_API}{path}"
+        resp = self.session.get(url, timeout=15)
+        if resp.status_code != 200:
+            logger.debug("GitHub API %s returned %d", path, resp.status_code)
+            return None
+        return resp.json()
 
-        readme_url = f"https://raw.githubusercontent.com/{owner}/{repo}/master/README.md"
-        try:
-            resp = self.session.get(readme_url, timeout=10)
-            if resp.status_code == 200:
-                return resp.text[:5000]
-        except Exception:
-            pass
-
+    def _get_readme(self, owner: str, repo: str) -> str:
+        for branch in ["main", "master"]:
+            readme_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/README.md"
+            try:
+                resp = self.session.get(readme_url, timeout=10)
+                if resp.status_code == 200:
+                    return resp.text[:5000]
+            except Exception:
+                pass
         return ""

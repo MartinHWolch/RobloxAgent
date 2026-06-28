@@ -41,5 +41,4 @@ __pycache__/
 .env
 .env.local
 
-# Knowledge Base generated data
-knowledge-base/data/
+# Knowledge Base generated data (intentionally committed)

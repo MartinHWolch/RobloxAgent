@@ -1,16 +1,14 @@
 import logging
+import re
 from typing import Any
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
-
 from .base import BaseScraper
-from config import CREATE_HUB_BASE, API_REF_BASE
+from config import CREATE_HUB_BASE
 
 logger = logging.getLogger(__name__)
 
 ENGINE_ARTICLES = [
-    "/docs/reference/engine/datastores/DataStore",
     "/docs/reference/engine/classes/Instance",
     "/docs/reference/engine/classes/Player",
     "/docs/reference/engine/classes/Part",
@@ -39,20 +37,14 @@ ENGINE_ARTICLES = [
     "/docs/reference/engine/classes/ContextActionService",
     "/docs/reference/engine/classes/TouchInputService",
     "/docs/reference/engine/classes/MarketplaceService",
-    "/docs/reference/engine/classes/GroupService",
-    "/docs/reference/engine/classes/TeamsService",
     "/docs/reference/engine/classes/BadgeService",
     "/docs/reference/engine/classes/InsertService",
     "/docs/reference/engine/classes/CollectionService",
     "/docs/reference/engine/classes/ReplicatedStorage",
     "/docs/reference/engine/classes/ServerStorage",
     "/docs/reference/engine/classes/ServerScriptService",
-    "/docs/reference/engine/classes/HttpClient",
     "/docs/reference/engine/classes/Plugin",
     "/docs/reference/engine/classes/Selection",
-    "/docs/reference/engine/classes/DebuggerManager",
-    "/docs/reference/engine/enums/Enum",
-    "/docs/reference/engine/libraries/RobloxGlobals",
     "/docs/reference/engine/libraries/string",
     "/docs/reference/engine/libraries/table",
     "/docs/reference/engine/libraries/math",
@@ -60,22 +52,22 @@ ENGINE_ARTICLES = [
     "/docs/reference/engine/libraries/task",
     "/docs/reference/engine/libraries/coroutine",
     "/docs/reference/engine/libraries/utf8",
-    "/docs/reference/engine/libraries/script",
 ]
 
 GUIDES = [
-    "/docs/education/build-it-play-it-island-of-move",
     "/docs/scripting",
-    "/docs/scripting/networking",
-    "/docs/scripting/data-persistence",
-    "/docs/scripting/ui",
-    "/docs/scripting/animations",
-    "/docs/scripting/physics",
-    "/docs/scripting/terrain",
-    "/docs/scripting/audio",
-    "/docs/scripting/optimization",
     "/docs/projects",
     "/docs/projects/data-model",
+    "/docs/ui",
+    "/docs/avatar",
+    "/docs/animation",
+    "/docs/physics",
+    "/docs/audio",
+    "/docs/environment",
+    "/docs/production",
+    "/docs/players",
+    "/docs/studio",
+    "/docs/tutorials",
 ]
 
 
@@ -84,7 +76,7 @@ class OfficialDocsScraper(BaseScraper):
         results = []
         for path in ENGINE_ARTICLES:
             try:
-                result = self._scrape_article(path)
+                result = self._scrape_markdown(path)
                 if result:
                     results.append(result)
                     logger.info("Scraped: %s", path)
@@ -92,34 +84,61 @@ class OfficialDocsScraper(BaseScraper):
                 logger.warning("Failed %s: %s", path, e)
         return results
 
-    def _scrape_article(self, path: str) -> dict[str, Any] | None:
-        url = urljoin(CREATE_HUB_BASE, path)
-        resp = self._get(url)
-        soup = BeautifulSoup(resp.text, "lxml")
-
-        title_el = soup.select_one("h1") or soup.select_one("title")
-        if not title_el:
+    def _scrape_markdown(self, path: str) -> dict[str, Any] | None:
+        base = path.replace("/docs/", "", 1)
+        md_url = f"https://create.roblox.com/docs/en-us/{base}.md"
+        resp = self.session.get(md_url, timeout=15)
+        if resp.status_code != 200:
             return None
-        title = self._clean_text(title_el.get_text())
 
-        content_el = soup.select_one(
-            "article, .article-content, .content, main, [role='main']"
-        ) or soup
-        text = self._clean_text(content_el.get_text())
+        text = resp.text
 
-        breadcrumbs = []
-        for crumb in soup.select("[class*='breadcrumb'] a, nav a"):
-            breadcrumbs.append(self._clean_text(crumb.get_text()))
+        title = self._extract_frontmatter(text, "name") or path.split("/")[-1]
+        summary = self._extract_frontmatter(text, "summary") or ""
+        class_type = self._extract_frontmatter(text, "type") or ""
+        tags = self._extract_frontmatter_list(text, "tags")
+        inherits = self._extract_frontmatter_list(text, "inherits")
+
+        content_body = self._strip_frontmatter(text)
 
         return {
             "title": title,
-            "url": url,
+            "url": urljoin(CREATE_HUB_BASE, path),
             "path": path,
-            "summary": text[:1000],
-            "content": text,
-            "breadcrumbs": breadcrumbs,
+            "summary": summary,
+            "type": class_type,
+            "tags": tags,
+            "inherits": inherits,
+            "content": content_body[:8000],
             "source": "official_docs",
         }
+
+    def _extract_frontmatter(self, text: str, key: str) -> str | None:
+        match = re.search(rf"^{key}: (.+)$", text, re.MULTILINE)
+        if match:
+            return match.group(1).strip().strip("\"'")
+        return None
+
+    def _extract_frontmatter_list(self, text: str, key: str) -> list[str]:
+        match = re.search(rf"^{key}:$", text, re.MULTILINE)
+        if not match:
+            return []
+        start = match.end()
+        items = []
+        for line in text[start:].split("\n"):
+            line = line.strip()
+            if line.startswith("- "):
+                items.append(line[2:].strip())
+            elif not line.startswith("  ") and line != "":
+                break
+        return items
+
+    def _strip_frontmatter(self, text: str) -> str:
+        if text.startswith("---"):
+            end = text.find("---", 3)
+            if end != -1:
+                return text[end + 3:].strip()
+        return text
 
 
 class CreatorHubScraper(BaseScraper):
@@ -127,7 +146,7 @@ class CreatorHubScraper(BaseScraper):
         results = []
         for path in GUIDES:
             try:
-                result = self._scrape_guide(path)
+                result = self._scrape_markdown(path)
                 if result:
                     results.append(result)
                     logger.info("Scraped guide: %s", path)
@@ -135,28 +154,41 @@ class CreatorHubScraper(BaseScraper):
                 logger.warning("Failed guide %s: %s", path, e)
         return results
 
-    def _scrape_guide(self, path: str) -> dict[str, Any] | None:
-        url = urljoin(CREATE_HUB_BASE, path)
-        resp = self._get(url)
-        soup = BeautifulSoup(resp.text, "lxml")
-
-        title_el = soup.select_one("h1") or soup.select_one("title")
-        if not title_el:
+    def _scrape_markdown(self, path: str) -> dict[str, Any] | None:
+        base = path.replace("/docs/", "", 1)
+        md_url = f"https://create.roblox.com/docs/en-us/{base}.md"
+        resp = self.session.get(md_url, timeout=15)
+        if resp.status_code != 200:
             return None
-        title = self._clean_text(title_el.get_text())
 
-        content_el = soup.select_one(
-            "article, .article-content, .content, main, [role='main']"
-        ) or soup
-        text = self._clean_text(content_el.get_text())
+        text = resp.text
+
+        title = self._extract_frontmatter(text, "name") or path.split("/")[-1]
+        summary = self._extract_frontmatter(text, "summary") or ""
+
+        content_body = self._strip_frontmatter(text)
 
         categories = path.strip("/").split("/")
 
         return {
             "title": title,
-            "url": url,
+            "url": urljoin(CREATE_HUB_BASE, path),
             "path": path,
-            "content": text,
+            "summary": summary,
+            "content": content_body[:8000],
             "categories": categories,
             "source": "creator_hub",
         }
+
+    def _extract_frontmatter(self, text: str, key: str) -> str | None:
+        match = re.search(rf"^{key}: (.+)$", text, re.MULTILINE)
+        if match:
+            return match.group(1).strip().strip("\"'")
+        return None
+
+    def _strip_frontmatter(self, text: str) -> str:
+        if text.startswith("---"):
+            end = text.find("---", 3)
+            if end != -1:
+                return text[end + 3:].strip()
+        return text
