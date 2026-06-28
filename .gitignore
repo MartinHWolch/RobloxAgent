@@ -42,3 +42,9 @@ __pycache__/
 .env.local
 
 # Knowledge Base generated data (intentionally committed)
+
+# RAG vector database (generated, too large)
+rag/chroma_db/
+
+# Generated project index files
+*_index.json
