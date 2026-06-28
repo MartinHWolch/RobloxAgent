@@ -32,6 +32,14 @@ packages/
 Thumbs.db
 desktop.ini
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
 # Env
 .env
 .env.local
+
+# Knowledge Base generated data
+knowledge-base/data/
