@@ -3,229 +3,200 @@
     "category": "examples",
     "subcategory": "categorized",
     "count": 10,
-    "updated": "2026-06-28T19:54:55.306015"
+    "updated": "2026-06-28T20:23:50.350743"
   },
   "items": [
     {
       "category": "inventory",
       "title": "Inventory System",
-      "patterns": [
-        "Inventory system for Roblox with backend data storage",
-        "Item management with categories and stacking",
-        "Player inventory UI with drag and drop"
-      ],
+      "architecture": "Client-Server with ModuleScripts",
       "key_services": [
         "DataStoreService",
         "ReplicatedStorage"
       ],
-      "architecture": "Client-Server with ModuleScripts",
+      "description": "A server-authoritative inventory system where the server validates all item operations. Items are represented as data (tables), not physical objects. The client requests actions via RemoteEvents and the server responds with updated state.",
+      "code_example": "-- Server: InventoryService\nlocal ProfileStore = require(Path.ProfileStore)\nlocal InventoryTemplate = {\n\titems = {},\n\tmaxSlots = 20,\n}\n\nfunction InventoryService:AddItem(player, itemId, quantity)\n\tlocal profile = self:GetProfile(player)\n\tlocal item = Config.Items[itemId]\n\tif not item or not item.stackable and profile.items[itemId] then\n\t\treturn false\n\tend\n\tprofile.items[itemId] = (profile.items[itemId] or 0) + quantity\n\treturn true\nend\n\n-- Client: InventoryController\nlocal remotes = ReplicatedStorage:WaitForChild(\"Remotes\")\nlocal addItemRemote = remotes:WaitForChild(\"AddItem\")\n\nfunction InventoryController:RequestAddItem(itemId)\n\taddItemRemote:FireServer(itemId)\nend\n\naddItemRemote.OnClientEvent:Connect(function(success)\n\tif success then\n\t\tself:RefreshUI()\n\tend\nend)",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Store inventory data in DataStore with serialization",
-        "Use RemoteEvents for inventory actions",
-        "Cache inventory on player join"
+        "Store inventory as flat data (itemId -> quantity), not as Instance objects",
+        "Always validate on server before committing to DataStore",
+        "Use ProfileStore pattern for auto-save and bindToClose",
+        "Cache inventory in memory, write to DataStore on changes and on player leave"
       ],
       "source": "examples"
     },
     {
       "category": "combat",
       "title": "Combat & NPC AI",
-      "patterns": [
-        "Turn-based or real-time combat with damage calculation",
-        "NPC behavior trees and state machines",
-        "Wave spawning with difficulty scaling"
-      ],
+      "architecture": "Server-authoritative with state machines",
       "key_services": [
         "PathfindingService",
-        "ReplicatedStorage",
-        "TweenService"
+        "TweenService",
+        "ReplicatedStorage"
       ],
-      "architecture": "ECS or OOP with State Machines",
+      "description": "NPCs run as state machines on the server. The server owns all hit detection (raycasts) and damage calculation. Clients receive visual-only updates. Use ComputeThickness for precise raycasts against complex geometry.",
+      "code_example": "-- NPC State Machine\nlocal NPC = {}\nNPC.__index = NPC\n\nfunction NPC.new(humanoid)\n\tlocal self = setmetatable({}, NPC)\n\tself.humanoid = humanoid\n\tself.state = \"idle\"\n\tself.attackRange = 10\n\treturn self\nend\n\nfunction NPC:Update(dt)\n\tif self.state == \"idle\" then\n\t\tlocal target = self:FindNearestPlayer()\n\t\tif target then\n\t\t\tself.state = \"chasing\"\n\t\t\tself.target = target\n\t\tend\n\telseif self.state == \"chasing\" then\n\t\tlocal dist = (self.target.Character.PrimaryPart.Position\n\t\t\t- self.humanoid.RootPart.Position).Magnitude\n\t\tif dist < self.attackRange then\n\t\t\tself.state = \"attacking\"\n\t\telse\n\t\t\tself.humanoid:MoveTo(self.target.Character.PrimaryPart.Position)\n\t\tend\n\telseif self.state == \"attacking\" then\n\t\tif self:CanAttack() then\n\t\t\tself:PerformRaycast()\n\t\tend\n\tend\nend",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Use raycasting for hit detection",
-        "Server-authoritative damage calculation",
-        "Damage numbers with BillboardGui"
+        "Use PathfindingService with RVP (Roblox Velocity Predictor) for smooth NPC movement",
+        "Server-authoritative damage: client sends intent, server validates and applies",
+        "Use ComputeThickness for accurate raycasts against character hitboxes",
+        "Pool NPCs instead of creating/destroying; disable and reposition"
       ],
       "source": "examples"
     },
     {
       "category": "quests",
       "title": "Quest System",
-      "patterns": [
-        "Quest progression with objectives and rewards",
-        "Quest journal UI with tracking",
-        "Dynamic quest generation from templates"
-      ],
+      "architecture": "Task-based objectives with event-driven progression",
       "key_services": [
-        "DataStoreService"
+        "DataStoreService",
+        "ReplicatedStorage"
       ],
-      "architecture": "Modular with task-based objectives",
+      "description": "Quests are composed of objectives that listen for game events (kill enemy, collect item, reach location). Progress is tracked per-player in DataStore. The server broadcasts quest updates to clients via RemoteEvents.",
+      "code_example": "-- Quest Objective\nlocal QuestObjective = {}\nQuestObjective.__index = QuestObjective\n\nfunction QuestObjective.new(config)\n\treturn setmetatable({\n\t\tid = config.id,\n\t\ttype = config.type, -- \"kill\", \"collect\", \"reach\"\n\t\trequired = config.required,\n\t\tcurrent = 0,\n\t\tonProgress = config.onProgress,\n\t}, QuestObjective)\nend\n\nfunction QuestObjective:Progress(amount)\n\tself.current = math.min(self.current + amount, self.required)\n\tif self.onProgress then\n\t\tself.onProgress(self)\n\tend\n\treturn self.current >= self.required\nend\n\n-- Server: QuestService\nfunction QuestService:RegisterQuestEvents()\n\tCollectionService:GetInstanceAddedSignal(\"Enemy\"):Connect(function(enemy)\n\t\tenemy.Destroying:Once(function()\n\t\t\tlocal killer = enemy:GetAttribute(\"lastHitter\")\n\t\t\tif killer then\n\t\t\t\tself:ProgressQuest(killer, \"kill_monsters\", 1)\n\t\t\tend\n\t\tend)\n\tend)\nend",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Store quest progress per-player in DataStore",
-        "Use BindableEvents for quest progression"
+        "Use event-driven progress instead of polling",
+        "Store quest state per-player in DataStore with ProfileStore",
+        "Use BindableEvents for internal quest progression signals",
+        "Support quest chains and branching via config tables, not hardcoded logic"
       ],
       "source": "examples"
     },
     {
       "category": "economy",
       "title": "Economy & Trading",
-      "patterns": [
-        "Virtual currency systems (soft and hard currency)",
-        "Player-to-player trading with validation",
-        "Marketplace with dynamic pricing"
-      ],
+      "architecture": "Server-authoritative with transaction logs",
       "key_services": [
         "MarketplaceService",
-        "DataStoreService"
+        "DataStoreService",
+        "MessagingService"
       ],
-      "architecture": "Server-authoritative with transaction logs",
+      "description": "Dual-currency system (soft currency earned in-game, hard currency from purchases). All transactions logged for anti-exploit. Player trading uses a two-phase commit protocol to ensure consistency.",
+      "code_example": "-- Server: EconomyService\nfunction EconomyService:DeductCurrency(player, currencyType, amount)\n\tlocal profile = self:GetProfile(player)\n\tif profile.currencies[currencyType] < amount then\n\t\treturn false, \"insufficient_funds\"\n\tend\n\tprofile.currencies[currencyType] -= amount\n\tself:LogTransaction(player, currencyType, -amount)\n\treturn true\nend\n\n-- Two-phase trade lock\nfunction EconomyService:InitiateTrade(player1, player2, offer1, offer2)\n\tlocal lock = self:AcquireLock(player1, player2)\n\tif not lock then return false, \"lock_failed\" end\n\n\tlocal ok1, err1 = self:ValidateOffer(player1, offer1)\n\tlocal ok2, err2 = self:ValidateOffer(player2, offer2)\n\tif not ok1 or not ok2 then\n\t\tlock:Release()\n\t\treturn false, err1 or err2\n\tend\n\n\tself:ExecuteSwap(player1, player2, offer1, offer2)\n\tlock:Release()\n\treturn true\nend",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Log all transactions for anti-exploit",
-        "Use MarketPlaceService for premium purchases"
+        "Log every transaction with timestamp, playerId, amount, and reason",
+        "Use two-phase commit for player trades to prevent item duplication",
+        "MarketplaceService.ProcessReceipt must return Enum.ProductPurchaseDecision.PurchaseGranted",
+        "Use MemoryStore for price caching and MarketplaceService for premium purchases"
       ],
       "source": "examples"
     },
     {
       "category": "persistence",
       "title": "Data Persistence",
-      "patterns": [
-        "Profile-based data saving with auto-save",
-        "Leaderboard and stat tracking",
-        "Cross-server data with MessagingService"
-      ],
+      "architecture": "Profile pattern with ProfileStore",
       "key_services": [
         "DataStoreService",
         "MemoryStoreService",
         "MessagingService"
       ],
-      "architecture": "Profile pattern with ProfileStore",
+      "description": "Profile-based data system using the ProfileStore pattern. Each player has a profile loaded on join and saved on leave. Auto-save every 60 seconds. Cross-server data sync via MessagingService. Use MemoryStore for temporary caches and cooldowns.",
+      "code_example": "-- Server: DataService\nlocal ProfileStore = require(Path.ProfileStore)\n\nlocal template = {\n\tcurrency = 0,\n\tinventory = {},\n\tquests = {},\n\tsettings = {},\n}\n\nlocal store = ProfileStore.New(\"PlayerData_v2\", template)\n\nfunction DataService:LoadProfile(player)\n\tlocal profile = store:LoadProfileAsync(\"Player_\" .. player.UserId)\n\tif not profile then\n\t\tplayer:Kick(\"Failed to load data\")\n\t\treturn nil\n\tend\n\tprofile:AddUserId(player.UserId)\n\tprofile:Reconcile()\n\tprofile:ListenToRelease(function()\n\t\tself:HandleProfileRelease(player, profile)\n\tend)\n\tself.activeProfiles[player] = profile\n\treturn profile\nend\n\ngame:BindToClose(function()\n\tfor _, profile in self.activeProfiles do\n\t\tprofile:Save()\n\tend\nend)",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Auto-save every 60 seconds",
-        "Use profile pattern with bindToClose"
+        "Use ProfileStore pattern for automatic saving and bindToClose",
+        "Auto-save every 60 seconds, but always save on player leave",
+        "Use MessagingService for cross-server data invalidation",
+        "MemoryStore for temporary data (cooldowns, sessions) - not for permanent storage",
+        "Version your data schema (e.g., PlayerData_v2) for migrations"
       ],
       "source": "examples"
     },
     {
       "category": "multiplayer",
       "title": "Multiplayer & Matchmaking",
-      "patterns": [
-        "Party system with invite and join",
-        "Matchmaking with skill-based or party-based queues",
-        "Server teleportation between game instances"
-      ],
+      "architecture": "Teleport + MessagingService coordination",
       "key_services": [
         "MessagingService",
-        "TeleportService"
+        "TeleportService",
+        "MemoryStoreService"
       ],
-      "architecture": "Teleport + MessagingService coordination",
+      "description": "Party system with invite/join flow using BindableEvents. Matchmaking with player skill rating or party-based queues. Cross-server communication via MessagingService. TeleportService moves players between game servers with preserved state.",
+      "code_example": "-- Server: MatchmakingService\nlocal queueTimeout = 60\n\nfunction MatchmakingService:JoinQueue(player, mode)\n\tlocal entry = {\n\t\tplayerId = player.UserId,\n\t\tmode = mode,\n\t\tskill = self:GetPlayerSkill(player),\n\t\ttimestamp = os.time(),\n\t}\n\tself.queue:Add(entry)\n\tself:TryMatch()\nend\n\nfunction MatchmakingService:TryMatch()\n\tlocal byMode = {}\n\tfor _, entry in self.queue:GetEntries() do\n\t\tbyMode[entry.mode] = byMode[entry.mode] or {}\n\t\ttable.insert(byMode[entry.mode], entry)\n\tend\n\n\tfor mode, players in byMode do\n\t\twhile #players >= self.modeConfig[mode].minPlayers do\n\t\t\tlocal match = {}\n\t\t\tfor i = 1, self.modeConfig[mode].maxPlayers do\n\t\t\t\ttable.insert(match, table.remove(players))\n\t\t\tend\n\t\t\tself:StartMatch(mode, match)\n\t\tend\n\tend\nend",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Validate party membership on server",
-        "Use TeleportService with join data"
+        "Use TeleportService with TeleportData to pass player state between servers",
+        "MessagingService for cross-server communication (rate limit: 100 msg/min)",
+        "Validate party membership on the server, never trust client",
+        "Use MemoryStore for matchmaking queues (automatic expiry)"
       ],
       "source": "examples"
     },
     {
       "category": "ui",
       "title": "UI Components",
-      "patterns": [
-        "Inventory UI with GridLayout and scrolling",
-        "Shop UI with categories and buying flow",
-        "Loading screen with animations and tips"
-      ],
+      "architecture": "Component-based with Roact or Fusion",
       "key_services": [
         "UserInputService",
-        "TweenService"
+        "TweenService",
+        "GuiService"
       ],
-      "architecture": "Component-based with React Lua or Fusion",
+      "description": "Complex UIs should use Roact (React Lua) for state-driven rendering. Simple UIs can use traditional event-based patterns. Use Scale and Offset together for responsive layouts. Pool UI elements to reduce garbage collection pressure.",
+      "code_example": "-- Roact Inventory UI (simplified)\nlocal Roact = require(Path.Roact)\nlocal InventoryItem = Roact.Component:extend(\"InventoryItem\")\n\nfunction InventoryItem:render()\n\treturn Roact.createElement(\"ImageButton\", {\n\t\tSize = UDim2.fromOffset(64, 64),\n\t\tPosition = UDim2.fromScale(self.props.index * 0.1, 0.5),\n\t\tImage = self.props.item.icon,\n\t\t[Roact.Event.Activated] = function()\n\t\t\tself.props.onSelect(self.props.item.id)\n\t\tend,\n\t}, {\n\t\tLabel = Roact.createElement(\"TextLabel\", {\n\t\t\tSize = UDim2.fromScale(1, 0.3),\n\t\t\tPosition = UDim2.fromScale(0, 0.7),\n\t\t\tText = self.props.item.name,\n\t\t\tTextScaled = true,\n\t\t})\n\t})\nend\n\nfunction InventoryUI:render()\n\treturn Roact.createElement(\"ScrollingFrame\", {\n\t\tSize = UDim2.fromScale(1, 1),\n\t\tCanvasSize = UDim2.fromScale(1, #self.props.items * 0.1),\n\t}, {\n\t\tItems = Roact.createFragment(\n\t\t\ttable.map(self.props.items, function(item, i)\n\t\t\t\treturn Roact.createElement(InventoryItem, {\n\t\t\t\t\titem = item,\n\t\t\t\t\tindex = i,\n\t\t\t\t\tonSelect = self.props.onSelect,\n\t\t\t\t})\n\t\t\tend)\n\t\t),\n\t})\nend",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Use React Lua for complex UI state",
-        "Pool UI elements to reduce GC pressure"
+        "Use Roact for complex UIs with many state transitions",
+        "Use Scale for layout, Offset for padding/margins (responsive design)",
+        "Pool UI elements instead of creating/destroying instances",
+        "TweenService for smooth transitions, not while loops",
+        "Use UIListLayout or UIGridLayout instead of manual position math"
       ],
       "source": "examples"
     },
     {
       "category": "animation",
       "title": "Animation System",
-      "patterns": [
-        "Character animation blending and layering",
-        "Procedural animation with IK",
-        "Animation events and keyframe callbacks"
-      ],
+      "architecture": "AnimationController + AnimationTrack pipeline",
       "key_services": [
         "AnimationController",
-        "AnimationTrack"
+        "AnimationTrack",
+        "Humanoid"
       ],
-      "architecture": "AnimationController + AnimationTrack pipeline",
+      "description": "Animations are loaded from ReplicatedStorage as Animation objects. Use AnimationController for programmatic animation blending. The Humanoid has built-in animation priorities (idle, walk, jump, etc.). Keyframe markers trigger callbacks for gameplay events.",
+      "code_example": "-- Client: AnimationController\nlocal player = Players.LocalPlayer\nlocal character = player.Character or player.CharacterAdded:Wait()\nlocal humanoid = character:WaitForChild(\"Humanoid\")\n\nlocal animController = Instance.new(\"AnimationController\")\nanimController.Parent = character\n\n-- Load animations from ReplicatedStorage\nlocal anims = {}\nfor _, animObj in ipairs(Path.Animations:GetChildren()) do\n\tlocal track = animController:LoadAnimation(animObj)\n\ttrack:GetMarkerReachedSignal(\"Hit\"):Connect(function()\n\t\t-- Called at specific frames in the animation\n\t\tself:OnHitFrame()\n\tend)\n\tanims[animObj.Name] = track\nend\n\nfunction AnimationService:Play(name, fadeTime)\n\tif self.currentTrack then\n\t\tself.currentTrack:Stop(fadeTime or 0.1)\n\tend\n\tself.currentTrack = anims[name]\n\tself.currentTrack:Play(fadeTime or 0.1, 1, 1)\nend\n\n-- Blend between animations\nfunction AnimationService:BlendToIdle(fadeTime)\n\tanims.walk:Stop(fadeTime or 0.3)\n\tanims.idle:Play(fadeTime or 0.3, 1, 1)\nend",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Use AnimationBlend for smooth transitions",
-        "Load animations in ReplicatedStorage"
+        "Store Animation objects in ReplicatedStorage for both client and server access",
+        "Use AnimationTrack:AdjustSpeed() for dynamic animation speed",
+        "Use keyframe markers for gameplay callbacks (footsteps, hit frames, etc.)",
+        "Always use fadeTime for smooth transitions, never instant stops",
+        "Use AnimationPriority to control which animation takes precedence"
       ],
       "source": "examples"
     },
     {
       "category": "vehicles",
       "title": "Vehicle System",
-      "patterns": [
-        "Seat-based vehicle with BodyMovers",
-        "Networked vehicle physics",
-        "Vehicle customization and upgrades"
-      ],
+      "architecture": "Server-authoritative physics with client interpolation",
       "key_services": [
         "VehicleSeat",
-        "BodyPosition",
-        "BodyVelocity"
+        "Constraints",
+        "AlignPosition",
+        "AlignOrientation"
       ],
-      "architecture": "Server-authoritative physics with client interpolation",
+      "description": "Use constraints (AlignPosition, AlignOrientation) instead of BodyMovers for stable vehicle physics. The server owns the physics simulation. Clients receive smoothed position updates. Use Attachment objects to define wheel positions and suspension points.",
+      "code_example": "-- Server: VehicleController\nlocal vehicle = script.Parent\nlocal seat = vehicle:WaitForChild(\"VehicleSeat\")\n\n-- Use constraints instead of BodyMovers\nlocal alignPos = Instance.new(\"AlignPosition\")\nalignPos.Attachment0 = vehicle.Engine.Attachment\nalignPos.Responsiveness = 20\nalignPos.MaxForce = 5000\nalignPos.Parent = vehicle\n\nlocal thrust = Instance.new(\"VectorForce\")\nthrust.Attachment0 = vehicle.Engine.Attachment\nthrust.RelativeTo = Enum.ActuatorRelativeTo.Attachment0\nthrust.Parent = vehicle\n\nseat.Changed:Connect(function(prop)\n\tif prop == \"Throttle\" then\n\t\tlocal direction = seat.Throttle\n\t\tthrust.Force = vehicle.CFrame.LookVector * direction * 2000\n\telseif prop == \"Steer\" then\n\t\tlocal steer = seat.Steer\n\t\talignPos.Responsiveness = 20 + math.abs(steer) * 10\n\tend\nend)",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Use constraints instead of BodyMovers for stability",
-        "Client-side interpolation for smooth movement"
+        "Use Constraint-based physics (AlignPosition, AlignOrientation) not BodyMovers",
+        "Server owns physics; client interpolates for smooth visuals",
+        "Use Attachment objects in specific locations for suspension and wheel points",
+        "Clamp Throttle and Steer values between -1 and 1",
+        "Use CylindricalConstraint for wheel rotation"
       ],
       "source": "examples"
     },
     {
       "category": "pets",
       "title": "Pet System",
-      "patterns": [
-        "AI follower pet with idle/walk animations",
-        "Pet evolution and stat growth",
-        "Pet collection and gacha mechanics"
-      ],
+      "architecture": "NPC follower with reduced complexity",
       "key_services": [
-        "PathfindingService"
+        "PathfindingService",
+        "WeldConstraint",
+        "Humanoid"
       ],
-      "architecture": "NPC clone with reduced complexity",
+      "description": "Pets are simplified NPCs that follow the player. Use WeldConstraint for idle positioning (shoulder, hover). Use simple Pathfinding for following. Reduce NPC complexity (no combat AI, simplified animations, no complex state machines).",
+      "code_example": "-- Server: PetService\nfunction PetService:SpawnPet(player, petConfig)\n\tlocal pet = ReplicatedStorage.Pets[petConfig.model]:Clone()\n\tpet.Parent = workspace\n\n\tlocal humanoid = pet:WaitForChild(\"Humanoid\")\n\thumanoid.WalkSpeed = petConfig.speed or 16\n\thumanoid.AutoRotate = true\n\n\tlocal follow = Instance.new(\"ObjectValue\")\n\tfollow.Name = \"FollowTarget\"\n\tfollow.Value = player.Character\n\tfollow.Parent = pet\n\n\tself.activePets[player] = pet\nend\n\n-- Pet follow behavior\nlocal function updatePetFollow(pet, dt)\n\tlocal target = pet.FollowTarget.Value\n\tif not target or not target.PrimaryPart then return end\n\n\tlocal dist = (target.PrimaryPart.Position - pet.PrimaryPart.Position).Magnitude\n\tif dist > 8 then\n\t\tlocal humanoid = pet:FindFirstChildOfClass(\"Humanoid\")\n\t\tif humanoid then\n\t\t\thumanoid:MoveTo(target.PrimaryPart.Position - target.PrimaryPart.CFrame.LookVector * 5)\n\t\tend\n\tend\nend\n\ngame:GetService(\"RunService\").Heartbeat:Connect(function(dt)\n\tfor _, pet in self.activePets do\n\t\tupdatePetFollow(pet, dt)\n\tend\nend)",
       "best_practices": [
-        "Use ModuleScripts for all logic",
-        "Separate client and server concerns",
-        "Validate all client requests on the server",
-        "Use simple AI pathfinding to follow player",
-        "Attach pet to player via WeldConstraint"
+        "Pets are lightweight NPCs - disable unnecessary services (combat AI, complex pathfinding)",
+        "Use WeldConstraint for idle pet positioning (hover, shoulder, etc.)",
+        "RunService.Heartbeat for smooth following, avoid while loops",
+        "Use PathfindingService only when pet is far from player (>50 studs)",
+        "Pre-load pet models in ReplicatedStorage, clone on spawn"
       ],
       "source": "examples"
     }

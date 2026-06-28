@@ -4,6 +4,7 @@ from typing import Any
 from urllib.parse import urljoin
 
 from .base import BaseScraper
+from .api_parser import parse_api_markdown
 from config import CREATE_HUB_BASE
 
 logger = logging.getLogger(__name__)
@@ -92,14 +93,15 @@ class OfficialDocsScraper(BaseScraper):
             return None
 
         text = resp.text
+        parsed = parse_api_markdown(text)
+        fm = parsed["frontmatter"]
+        sections = parsed["sections"]
 
-        title = self._extract_frontmatter(text, "name") or path.split("/")[-1]
-        summary = self._extract_frontmatter(text, "summary") or ""
-        class_type = self._extract_frontmatter(text, "type") or ""
-        tags = self._extract_frontmatter_list(text, "tags")
-        inherits = self._extract_frontmatter_list(text, "inherits")
-
-        content_body = self._strip_frontmatter(text)
+        title = fm.get("name") or path.split("/")[-1]
+        summary = fm.get("summary", "")
+        class_type = fm.get("type", "")
+        tags = fm.get("tags", [])
+        inherits = fm.get("inherits", [])
 
         return {
             "title": title,
@@ -109,7 +111,11 @@ class OfficialDocsScraper(BaseScraper):
             "type": class_type,
             "tags": tags,
             "inherits": inherits,
-            "content": content_body[:8000],
+            "properties": sections["properties"],
+            "methods": sections["methods"],
+            "events": sections["events"],
+            "callbacks": sections["callbacks"],
+            "enums": sections["enums"],
             "source": "official_docs",
         }
 
@@ -162,33 +168,56 @@ class CreatorHubScraper(BaseScraper):
             return None
 
         text = resp.text
+        parsed = _parse_guide_frontmatter(text)
 
-        title = self._extract_frontmatter(text, "name") or path.split("/")[-1]
-        summary = self._extract_frontmatter(text, "summary") or ""
+        title = parsed.get("title") or path.split("/")[-1].replace("-", " ").title()
+        description = parsed.get("description", "")
 
-        content_body = self._strip_frontmatter(text)
+        content_body = _strip_fm(text)
 
         categories = path.strip("/").split("/")
+
+        guide_type = self._classify_guide(path)
 
         return {
             "title": title,
             "url": urljoin(CREATE_HUB_BASE, path),
             "path": path,
-            "summary": summary,
+            "summary": description,
+            "type": guide_type,
             "content": content_body[:8000],
+            "tags": parsed.get("tags", []),
             "categories": categories,
             "source": "creator_hub",
         }
 
-    def _extract_frontmatter(self, text: str, key: str) -> str | None:
-        match = re.search(rf"^{key}: (.+)$", text, re.MULTILINE)
-        if match:
-            return match.group(1).strip().strip("\"'")
-        return None
+    def _classify_guide(self, path: str) -> str:
+        if "/tutorials" in path:
+            return "tutorial"
+        if "/reference/" in path:
+            return "reference"
+        return "guide"
 
-    def _strip_frontmatter(self, text: str) -> str:
-        if text.startswith("---"):
-            end = text.find("---", 3)
-            if end != -1:
-                return text[end + 3:].strip()
-        return text
+
+def _parse_guide_frontmatter(text: str) -> dict[str, Any]:
+    """Parse frontmatter from guide markdown (uses title:/description: keys)."""
+    fm = {}
+    if not text.startswith("---"):
+        return fm
+    end = text.find("---", 3)
+    if end == -1:
+        return fm
+    block = text[3:end]
+    for line in block.strip().split("\n"):
+        if ": " in line:
+            key, val = line.split(": ", 1)
+            fm[key.strip()] = val.strip().strip("\"'")
+    return fm
+
+
+def _strip_fm(text: str) -> str:
+    if text.startswith("---"):
+        end = text.find("---", 3)
+        if end != -1:
+            return text[end + 3:].strip()
+    return text
