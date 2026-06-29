@@ -21,6 +21,7 @@ KB_SOURCES = {
     "devforum": os.path.join(DATA_DIR, "community", "devforum.json"),
     "github": os.path.join(DATA_DIR, "code", "github_repos.json"),
     "examples": os.path.join(DATA_DIR, "examples", "categorized.json"),
+    "web_resources": os.path.join(DATA_DIR, "external", "web_resources.json"),
 }
 
 DEFAULT_TOP_K = 10

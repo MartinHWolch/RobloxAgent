@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 
 from .base import BaseScraper
 from .api_parser import parse_api_markdown
-from config import CREATE_HUB_BASE
+from config import CREATE_HUB_BASE, OFFICIAL_DOCS_EXTRA
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +70,8 @@ GUIDES = [
     "/docs/studio",
     "/docs/tutorials",
 ]
+
+GUIDES = list(dict.fromkeys(GUIDES + OFFICIAL_DOCS_EXTRA))
 
 
 class OfficialDocsScraper(BaseScraper):

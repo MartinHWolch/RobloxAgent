@@ -8,6 +8,7 @@ from scrapers.official_docs import OfficialDocsScraper, CreatorHubScraper
 from scrapers.devforum import DevForumScraper
 from scrapers.github_repos import GitHubScraper
 from scrapers.examples import ExamplesScraper
+from scrapers.web_resources import WebResourcesScraper
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,6 +23,7 @@ SCRAPERS = {
     "devforum": (DevForumScraper, "community", "devforum"),
     "github": (GitHubScraper, "code", "github_repos"),
     "examples": (ExamplesScraper, "examples", "categorized"),
+    "web_resources": (WebResourcesScraper, "external", "web_resources"),
 }
 
 

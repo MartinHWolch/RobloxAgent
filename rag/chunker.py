@@ -36,6 +36,8 @@ def chunk_document(item: dict) -> list[dict]:
         return _chunk_github(item)
     elif source == "examples":
         return _chunk_examples(item)
+    elif source == "web_resources":
+        return _chunk_web_resource(item)
     else:
         return _generic_chunk(item, source_name)
 
@@ -110,11 +112,22 @@ def _chunk_devforum(item: dict) -> list[dict]:
     content = item.get("content", "")
     raw = item.get("raw", "")
     category_raw = item.get("category_raw", item.get("category", "General"))
-    likes = item.get("likes", 0)
-    posts = item.get("posts", 0)
+    posts = item.get("posts", [])
+    if isinstance(posts, list):
+        likes = sum(p.get("likes", 0) for p in posts if isinstance(p, dict))
+        replies = len(posts)
+        post_text = "\n\n".join(
+            f"Post by {p.get('author', 'unknown')} | Likes: {p.get('likes', 0)}\n{p.get('content', '')}"
+            for p in posts
+            if isinstance(p, dict)
+        )
+    else:
+        likes = item.get("likes", 0)
+        replies = posts
+        post_text = ""
 
-    header = f"Title: {title}\nCategory: {category_raw}\nLikes: {likes} | Replies: {posts}"
-    body = content or raw
+    header = f"Title: {title}\nCategory: {category_raw}\nLikes: {likes} | Replies: {replies}"
+    body = content or raw or post_text
 
     text = f"{header}\n\n{body}"
     return _split_chunks(text, {
@@ -126,7 +139,7 @@ def _chunk_devforum(item: dict) -> list[dict]:
 
 
 def _chunk_github(item: dict) -> list[dict]:
-    full_name = item.get("full_name", item.get("name", "Unknown"))
+    full_name = item.get("full_name") or item.get("title") or item.get("name", "Unknown")
     description = item.get("description", "")
     readme = item.get("readme", "")
     stars = item.get("stars", 0)
@@ -173,6 +186,21 @@ def _chunk_examples(item: dict) -> list[dict]:
         "category": category_name,
         "name": f"Example: {category_name}",
         "type": "example",
+    })
+
+
+def _chunk_web_resource(item: dict) -> list[dict]:
+    title = item.get("title", "Untitled")
+    topic = item.get("topic", "external")
+    url = item.get("url", "")
+    content = item.get("content", "")
+
+    text = f"Title: {title}\nTopic: {topic}\nURL: {url}\n\n{content}"
+    return _split_chunks(text, {
+        "source": "web_resources",
+        "category": topic,
+        "name": title,
+        "type": "web_resource",
     })
 
 

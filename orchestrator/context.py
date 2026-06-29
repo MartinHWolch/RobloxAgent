@@ -41,13 +41,56 @@ def _query_rag(query: str) -> list[dict]:
     try:
         sys.path.insert(0, os.path.join(PROJECT_ROOT))
         from rag.retriever import retrieve
-        results = retrieve(query, top_k=RAG_TOP_K)
+        search_queries = _rag_search_queries(query)
+        results = []
+        seen_ids = set()
+        per_query = max(3, RAG_TOP_K // max(len(search_queries), 1))
+
+        for search_query in search_queries:
+            for r in retrieve(search_query, top_k=per_query):
+                rid = r.get("id")
+                if rid in seen_ids:
+                    continue
+                seen_ids.add(rid)
+                results.append(r)
+
+        results = results[:RAG_TOP_K]
         for r in results:
             if isinstance(r.get("text"), str):
                 r["text"] = r["text"][:2000]
         return results
     except Exception as e:
         return [{"error": f"RAG error: {e}"}]
+
+
+def _rag_search_queries(query: str) -> list[str]:
+    lower = query.lower()
+    queries = []
+
+    if any(term in lower for term in ["guardar", "guardado", "datos", "persistencia", "datastore", "profilestore"]):
+        queries.append("DataStore ProfileStore ProfileService session locking autosave UpdateAsync player data persistence")
+
+    if any(term in lower for term in ["remoteevent", "remote", "validaci", "seguridad", "exploit", "server authoritative", "autoridad"]):
+        queries.append("RemoteEvent OnServerEvent server authoritative sanity checks exploit prevention remote validation")
+
+    if any(term in lower for term in ["arquitectura", "estructura", "proyecto", "rojo", "wally"]):
+        queries.append("Roblox architecture Rojo Wally services modules controllers project structure")
+
+    if any(term in lower for term in ["memorystore", "matchmaking", "cola", "queue"]):
+        queries.append("MemoryStoreService MemoryStoreQueue MemoryStoreSortedMap matchmaking cross server")
+
+    if any(term in lower for term in ["npc", "pathfinding", "camino", "path"]):
+        queries.append("PathfindingService NPC optimization humanoid performance A star")
+
+    expanded = _expand_query_for_rag(query, queries)
+    return list(dict.fromkeys(queries + [expanded]))
+
+
+def _expand_query_for_rag(query: str, additions: list[str]) -> str:
+    if not additions:
+        return query
+
+    return f"{query}\n\nSearch keywords: {' '.join(additions)}"
 
 
 def _index_project(project_path: str) -> dict | None:

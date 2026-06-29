@@ -124,4 +124,9 @@ def reset():
         pass
     _collection = None
     if os.path.isdir(CHROMA_DB_DIR):
-        shutil.rmtree(CHROMA_DB_DIR)
+        try:
+            shutil.rmtree(CHROMA_DB_DIR)
+        except PermissionError:
+            # Chroma keeps sqlite handles open on Windows; deleting the
+            # collection is enough for a clean rebuild in this process.
+            pass

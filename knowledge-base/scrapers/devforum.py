@@ -5,7 +5,7 @@ from typing import Any
 from urllib.parse import urljoin
 
 from .base import BaseScraper
-from config import DEVFORUM_BASE, DEVFORUM_SEARCH_QUERIES
+from config import DEVFORUM_BASE, DEVFORUM_SEARCH_QUERIES, DEVFORUM_CURATED_TOPIC_IDS, DEVFORUM_EXCLUDED_TOPIC_IDS
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +31,27 @@ class DevForumScraper(BaseScraper):
         seen_ids = set()
         results = []
 
+        for tid in DEVFORUM_CURATED_TOPIC_IDS:
+            if tid in DEVFORUM_EXCLUDED_TOPIC_IDS:
+                continue
+            if tid in seen_ids:
+                continue
+            seen_ids.add(tid)
+            try:
+                detail = self._fetch_topic(tid)
+                if detail:
+                    detail["curated"] = True
+                    results.append(detail)
+                    logger.info("Scraped curated topic %d: %s", tid, detail["title"][:50])
+            except Exception as e:
+                logger.debug("Failed curated topic %d: %s", tid, e)
+
         for query in DEVFORUM_SEARCH_QUERIES:
             try:
                 topic_ids = self._search_topic_ids(query)
                 for tid in topic_ids:
+                    if tid in DEVFORUM_EXCLUDED_TOPIC_IDS:
+                        continue
                     if tid not in seen_ids:
                         seen_ids.add(tid)
                         try:
