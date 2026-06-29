@@ -48,3 +48,6 @@ rag/chroma_db/
 
 # Generated project index files
 *_index.json
+
+# Memory DB (regenerated each session)
+memory/memory.db
