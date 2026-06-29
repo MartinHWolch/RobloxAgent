@@ -1,31 +1,26 @@
-"""Context builder: gathers relevant context from RAG, memory, and project indexer."""
+"""Context builder: gathers relevant context from RAG and memory."""
 
 import os
-import json
 import sys
 from typing import Any
 
 from .config import PROJECT_ROOT, RAG_TOP_K, MEMORY_RULES_LIMIT
-from .router import classify, needs_rag, needs_project, needs_memory
+from .router import classify, needs_rag, needs_memory
 
 
-def gather_context(query: str, project_path: str | None = None) -> dict[str, Any]:
+def gather_context(query: str) -> dict[str, Any]:
     intents = classify(query)
 
     context = {
         "query": query,
         "intents": intents,
         "rag_results": [],
-        "project_index": None,
         "memory_rules": [],
         "memory_cases": [],
     }
 
     if needs_rag(intents):
         context["rag_results"] = _query_rag(query)
-
-    if needs_project(intents) and project_path:
-        context["project_index"] = _index_project(project_path)
 
     if needs_memory(intents):
         rules, cases = _query_memory(query)
@@ -73,8 +68,8 @@ def _rag_search_queries(query: str) -> list[str]:
     if any(term in lower for term in ["remoteevent", "remote", "validaci", "seguridad", "exploit", "server authoritative", "autoridad"]):
         queries.append("RemoteEvent OnServerEvent server authoritative sanity checks exploit prevention remote validation")
 
-    if any(term in lower for term in ["arquitectura", "estructura", "proyecto", "rojo", "wally"]):
-        queries.append("Roblox architecture Rojo Wally services modules controllers project structure")
+    if any(term in lower for term in ["arquitectura", "estructura", "proyecto"]):
+        queries.append("Roblox server services modules controllers structure architecture")
 
     if any(term in lower for term in ["memorystore", "matchmaking", "cola", "queue"]):
         queries.append("MemoryStoreService MemoryStoreQueue MemoryStoreSortedMap matchmaking cross server")
@@ -91,29 +86,6 @@ def _expand_query_for_rag(query: str, additions: list[str]) -> str:
         return query
 
     return f"{query}\n\nSearch keywords: {' '.join(additions)}"
-
-
-def _index_project(project_path: str) -> dict | None:
-    try:
-        sys.path.insert(0, os.path.join(PROJECT_ROOT))
-        from project_indexer import index_project as run_index
-        result = run_index(project_path)
-        summary = result.get("summary", {})
-        return {
-            "name": result.get("project", {}).get("name", ""),
-            "framework": result.get("project", {}).get("framework", ""),
-            "total_scripts": summary.get("total_scripts", 0),
-            "total_code_lines": summary.get("total_code_lines", 0),
-            "services_used": summary.get("services_used", []),
-            "scripts": [
-                {"name": s.get("name", ""), "path": s.get("path", ""),
-                 "services": s.get("services", []),
-                 "requires": [r["path"] for r in s.get("requires", [])]}
-                for s in result.get("scripts", [])
-            ],
-        }
-    except Exception as e:
-        return {"error": f"Project index error: {e}"}
 
 
 def _query_memory(query: str) -> tuple[list, list]:

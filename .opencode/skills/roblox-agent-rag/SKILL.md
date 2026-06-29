@@ -1,6 +1,6 @@
 ---
 name: roblox-agent-rag
-description: Use when working on Roblox, Luau, Rojo, Wally, DataStore, RemoteEvent, Studio MCP, or Roblox architecture tasks; instructs OpenCode to consult the local Roblox RAG and project indexer.
+description: Use when working on Roblox, Luau, DataStore, RemoteEvent, Studio MCP, or Roblox architecture tasks; instructs OpenCode to consult the local Roblox RAG knowledge base.
 ---
 
 # Roblox Agent RAG
@@ -21,12 +21,6 @@ Check indexed chunk count:
 python -m rag stats
 ```
 
-Index a Roblox/Rojo project:
-
-```bash
-python -m project-indexer "<project path>"
-```
-
 Use the orchestrator only for standalone smoke tests. Inside OpenCode, prefer querying `rag` directly and let OpenCode's model produce the answer.
 
 ## Guidance
@@ -35,7 +29,6 @@ Use the orchestrator only for standalone smoke tests. Inside OpenCode, prefer qu
 - Use Luau with `--!strict` for new scripts/modules.
 - Prefer ProfileStore for new player persistence.
 - Validate RemoteEvents on the server and design server-authoritative gameplay.
-- Use Rojo/Wally/Aftman conventions for file-based projects.
 - Avoid React Luau, Roact, Rodux, and Reflex unless the user explicitly asks for them.
-- If Roblox Studio MCP tools are available, use them for live Studio inspection/modification.
+- If Roblox Studio MCP tools are available, use them for all live Studio inspection/modification.
 - Cite RAG sources in final answers when giving technical recommendations.

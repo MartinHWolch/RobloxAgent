@@ -8,9 +8,9 @@ from .prompts import build_messages
 from .llm import call_llm
 
 
-def process_query(query: str, project_path: str | None = None) -> dict[str, Any]:
+def process_query(query: str) -> dict[str, Any]:
     intents = classify(query)
-    context = gather_context(query, project_path)
+    context = gather_context(query)
     messages = build_messages(query, context)
 
     response = call_llm(messages)
@@ -22,5 +22,4 @@ def process_query(query: str, project_path: str | None = None) -> dict[str, Any]
         "rag_count": len(context.get("rag_results", [])),
         "rules_count": len(context.get("memory_rules", [])),
         "cases_count": len(context.get("memory_cases", [])),
-        "has_project": context.get("project_index") is not None,
     }

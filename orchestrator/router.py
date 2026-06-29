@@ -29,20 +29,6 @@ _INTENT_PATTERNS: list[tuple[str, str, list[str]]] = [
         r"ejemplo\s+(de|para)",
         r"tutorial",
     ]),
-    ("project_query", "current project", [
-        r"project\s*(structure|layout|tree)",
-        r"estructura\s+del\s+proyecto",
-        r"show\s+(me\s+)?(the\s+)?(project|structure)",
-        r"what\s+(scripts|services|modules)\s+",
-        r"qu[eé]\s+(scripts|servicios|m[oó]dulos)\s+",
-        r"list\s+(scripts|services|modules|files)",
-        r"listar\s+(scripts|servicios|m[oó]dulos|archivos)",
-        r"index\s+(the\s+)?project",
-        r"analyze\s+(the\s+)?project",
-        r"analiza(r)?\s+(el\s+)?proyecto",
-        r"scan\s+(the\s+)?project",
-        r"escanea(r)?\s+(el\s+)?proyecto",
-    ]),
     ("code_gen", "code generation", [
         r"(create|make|build|write|implement|add|generate)\s+(a\s+|an\s+|the\s+)?",
         r"(crea(r)?|hacer|haz|constru(ir|ye)|escrib(e|ir)|implementa(r)?|agrega(r)?|genera(r)?)\s+",
@@ -115,10 +101,6 @@ def classify(query: str) -> list[dict]:
 
 def needs_rag(intents: list[dict]) -> bool:
     return any(i["intent"] in ("knowledge_query", "code_gen", "general") for i in intents)
-
-
-def needs_project(intents: list[dict]) -> bool:
-    return any(i["intent"] == "project_query" for i in intents)
 
 
 def needs_memory(intents: list[dict]) -> bool:

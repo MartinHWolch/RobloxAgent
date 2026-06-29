@@ -9,8 +9,7 @@ SYSTEM_PROMPT = """You are a senior Roblox developer AI assistant. You help deve
 
 You have access to:
 1. A curated knowledge base of Roblox documentation, DevForum topics, GitHub libraries, and code examples
-2. The project index (structure, scripts, dependencies) if the user provides a project path
-3. Persistent memory (project rules, past decisions, resolved cases)
+2. Persistent memory (project rules, past decisions, resolved cases)
 
 ## Guidelines
 - Always reference the knowledge base context when answering technical questions
@@ -25,16 +24,12 @@ You have access to:
 
 def build_messages(query: str, context: dict[str, Any]) -> tuple[list[dict], list[dict]]:
     rag_context = _format_rag(context.get("rag_results", []))
-    project_context = _format_project(context.get("project_index"))
     memory_context = _format_memory(context.get("memory_rules", []), context.get("memory_cases", []))
 
     system = SYSTEM_PROMPT
 
     if rag_context:
         system += f"\n\n## Relevant Knowledge Base\n{rag_context}"
-
-    if project_context:
-        system += f"\n\n## Project Structure\n{project_context}"
 
     if memory_context:
         system += f"\n\n## Project Memory\n{memory_context}"
@@ -67,32 +62,6 @@ def _format_rag(results: list[dict]) -> str:
         lines.append(entry)
         total_chars += len(entry)
     return "".join(lines)
-
-
-def _format_project(index: dict | None) -> str:
-    if not index:
-        return ""
-    if "error" in index:
-        return f"(Index error: {index['error']})"
-
-    lines = [f"Project: {index.get('name', '?')}"]
-    lines.append(f"Framework: {index.get('framework', '?')}")
-    lines.append(f"Scripts: {index.get('total_scripts', 0)} ({index.get('total_code_lines', 0)} lines)")
-    services = index.get("services_used", [])
-    if services:
-        lines.append(f"Services used: {', '.join(services)}")
-    lines.append("")
-
-    for s in index.get("scripts", []):
-        svcs = [sv["service"] for sv in s.get("services", [])]
-        deps = s.get("requires", [])
-        lines.append(f"  {s['name']} ({s['path']})")
-        if svcs:
-            lines.append(f"    Services: {', '.join(svcs)}")
-        if deps:
-            lines.append(f"    Requires: {', '.join(deps[:3])}")
-
-    return "\n".join(lines)
 
 
 def _format_memory(rules: list, cases: list) -> str:

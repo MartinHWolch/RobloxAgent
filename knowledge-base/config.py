@@ -40,7 +40,6 @@ DEVFORUM_CURATED_TOPIC_IDS = [
     1909935,  # BridgeNet (original)
     767594,   # A Complete Guide: How Exploits Work & How to Prevent Them
     4139321,  # Server Authority: Studio Beta Insights from Engineers
-    684187,   # Best Rojo Use for Multi-Placed Game
     2959803,  # My Problem with SSA Frameworks (notably Knit)
     2511448,  # Optimization Tips on NPCs (1500 NPCs)
     4603494,  # Simulating thousands of moving NPCs
@@ -53,10 +52,6 @@ DEVFORUM_CURATED_TOPIC_IDS = [
     3471837,  # Is UnreliableRemoteEvent actually that fast?
     3573907,  # Packet networking library
     2917430,  # Networking libraries: Warp/FastNet2/etc.
-    2443196,  # Automate place publishing with partially managed Rojo
-    3494179,  # Workflow with Rojo and scripts inside tools
-    838182,   # Setup Rojo fast with Git support
-    2185389,  # Luau language server for external editors
     260694,   # How useful is StreamingEnabled?
     2641353,  # Your experience with StreamingEnabled
     3818624,  # EditableMesh and EditableImage improvements
@@ -65,7 +60,8 @@ DEVFORUM_CURATED_TOPIC_IDS = [
 ]
 
 DEVFORUM_EXCLUDED_TOPIC_IDS = [
-    4566806,  # Evolving Luau OSS thread includes UI framework discussion; not relevant for this agent.
+    4566806,  # Evolving Luau OSS thread includes UI framework discussion
+    684187,   # Best Rojo Use for Multi-Placed Game
 ]
 
 DEVFORUM_SEARCH_QUERIES = [
@@ -79,14 +75,12 @@ DEVFORUM_SEARCH_QUERIES = [
 ]
 
 GITHUB_REPOS = [
-    # Existing
     ("Sleitnick", "Knit"),
     ("dphfox", "Fusion"),
     ("evaera", "matter"),
     ("evaera", "roblox-lua-promise"),
     ("Roblox", "testez"),
     ("LPGhatguy", "luajson"),
-    # New curated
     ("Sleitnick", "RbxUtil"),
     ("matter-ecs", "matter"),
     ("MadStudioRoblox", "ProfileStore"),
@@ -97,24 +91,9 @@ GITHUB_REPOS = [
     ("howmanysmall", "Janitor"),
     ("evaera", "Cmdr"),
     ("Quenty", "NevermoreEngine"),
-    ("Roblox", "tarmac"),
-    ("Roblox", "place-ci-cd-demo"),
     ("Roblox", "studio-rust-mcp-server"),
-    # Tooling / file formats / language infrastructure
-    ("rojo-rbx", "rojo"),
-    ("rojo-rbx", "rbx-dom"),
-    ("UpliftGames", "wally"),
-    ("lpghatguy", "aftman"),
-    ("lune-org", "lune"),
-    ("Kampfkarren", "selene"),
-    ("JohnnyMorganz", "StyLua"),
-    ("seaofvoices", "darklua"),
-    ("rojo-rbx", "remodel"),
-    ("Anaminus", "rbxmk"),
     ("luau-lang", "luau"),
-    ("JohnnyMorganz", "luau-lsp"),
-    ("roblox-ts", "roblox-ts"),
-    ("roblox-ts", "vscode-roblox-ts"),
+    ("lune-org", "lune"),
     ("Roblox", "chalk-lua"),
     ("Roblox", "signals"),
     ("littensy", "charm"),
@@ -125,17 +104,6 @@ GITHUB_REPOS = [
     ("Sleitnick", "Loader"),
     ("Sleitnick", "Option"),
     ("Sleitnick", "RbxCameraShaker"),
-    ("Sleitnick", "AeroGameFramework"),
-    ("osyrisrblx", "rbxts-build"),
-    ("christopher-buss", "roblox-ts-project-template"),
-    ("grilme99", "roblox-project-template"),
-    ("devsarim", "roblox-project-template"),
-    ("takoyakisoft", "roblox-rojo-wally-template"),
-    ("dig1t", "rojo-template"),
-    ("nightcycle", "roblox-benchmarks"),
-    ("latte-soft", "maui"),
-    ("JohnnyMorganz", "wally-package-types"),
-    ("Sleitnick", "rbxcloud"),
     ("YetAnotherClown", "YetAnotherNet"),
     ("sircfenner", "png-luau"),
     ("mathtechstudio", "roblox-slang"),
@@ -215,23 +183,6 @@ WEB_RESOURCES = [
     ("https://sleitnick.github.io/RbxUtil/api/Signal/", "Signal docs", "Signal utility docs"),
     ("https://eryn.io/Cmdr/", "Cmdr docs", "Command framework docs"),
     ("https://quenty.github.io/NevermoreEngine/", "NevermoreEngine docs", "Large framework docs"),
-    ("https://lune-org.github.io/docs/", "Lune docs", "Standalone Luau runtime docs"),
-    ("https://rojo.space/docs/", "Rojo docs", "Rojo project tooling docs"),
-    ("https://rojo.space/docs/v7/project-format/", "Rojo project format", "default.project.json docs"),
-    ("https://rojo.space/docs/v7/sourcemap/", "Rojo sourcemap", "Sourcemap docs"),
-    ("https://wally.run/", "Wally docs", "Package manager docs"),
-    ("https://wally.run/package-format/", "Wally package format", "wally.toml docs"),
-    ("https://kampfkarren.github.io/selene/", "Selene docs", "Linter docs"),
-    ("https://kampfkarren.github.io/selene/usage/configuration.html", "Selene config", "selene.toml docs"),
-    ("https://stylua.com/", "StyLua docs", "Formatter docs"),
-    ("https://stylua.com/configuration/", "StyLua config", "stylua.toml docs"),
-    ("https://darklua.com/", "Darklua docs", "Luau build tooling docs"),
-    ("https://darklua.com/docs/configuration/", "Darklua config", "darklua.json docs"),
-    ("https://dom.rojo.space/", "rbx-dom docs", "Roblox file format docs"),
-    ("https://github.com/rojo-rbx/rbx-dom/blob/master/docs/binary.md", ".rbxm/.rbxl binary", "Roblox binary format"),
-    ("https://github.com/rojo-rbx/rbx-dom/blob/master/docs/xml.md", ".rbxmx/.rbxlx XML", "Roblox XML format"),
-    ("https://github.com/lpghatguy/aftman#configuration", "Aftman config", "aftman.toml docs"),
-    ("https://roblox-ts.com/docs/", "roblox-ts docs", "TypeScript to Luau docs"),
     ("https://luau.org/news/2024-07-23-luau-recap-july-2024/", "Luau July 2024 recap", "Luau release notes"),
     ("https://devforum.roblox.com/c/updates/release-notes/62", "DevForum release notes", "Roblox release notes category"),
     ("https://devforum.roblox.com/c/updates/45", "Roblox updates", "Platform updates category"),
@@ -250,7 +201,5 @@ GITHUB_REPOS_NEWLY_ADDED = [
     "howmanysmall/Janitor",
     "evaera/Cmdr",
     "Quenty/NevermoreEngine",
-    "Roblox/tarmac",
-    "Roblox/place-ci-cd-demo",
     "Roblox/studio-rust-mcp-server",
 ]
