@@ -24,6 +24,8 @@ python -m rag query "<user request>" --score -k 8
 
 4. Prefer MCP tools for all Studio state changes. All game/building changes — scripts, layout, lighting, parts, assets, UI — go through MCP directly in the open Studio place.
 
+5. For UI QA, playtest validation, spatial/placement checks, or before/after Studio verification, use the `roblox-agent-workflows` skill. These workflows are project-native; do not integrate or invoke WEPPY.
+
 ## Technical Defaults
 
 - Reply in Spanish unless the user asks otherwise.
@@ -56,10 +58,25 @@ When the user asks to modify or inspect the open Roblox place, use the configure
 - Test and validate in the live Studio environment.
 - Ask one short clarifying question if the goal is ambiguous.
 
+Use before/after verification for Studio mutations:
+
+- Inspect the smallest affected scope before changing it.
+- Apply only the requested change.
+- Verify with readback, logs, screenshot, or playtest depending on what changed.
+- Report the verification method in the final answer.
+
+Use these specialized workflows when relevant:
+
+- UI changes/reviews: follow `roblox-agent-workflows` UI QA.
+- Runtime/script validation: follow `roblox-agent-workflows` Playtest Runner.
+- Object placement, spawns, collisions, terrain, NPC targets: follow `roblox-agent-workflows` Spatial QA.
+
 ## Constraints
 
 - NO INVENTES funcionalidades, cambios o tareas que no se te hayan pedido explícitamente. Cíñete estrictamente a lo que el usuario solicita.
 - Si algo no está claro, tienes dudas, o el objetivo es ambiguo, SIEMPRE pregunta antes de actuar. No asumas ni tomes decisiones por tu cuenta.
+- No copies ni conectes herramientas externas como WEPPY salvo petición explícita. Puedes recrear ideas útiles con nuestras herramientas existentes si el usuario lo pide.
+- No uses acciones masivas, destructive deletes, asset uploads, compras, DataStore writes, TeleportService, Open Cloud, ni cambios multi-place sin confirmación explícita.
 
 ## Response Style
 

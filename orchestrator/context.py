@@ -77,6 +77,15 @@ def _rag_search_queries(query: str) -> list[str]:
     if any(term in lower for term in ["npc", "pathfinding", "camino", "path"]):
         queries.append("PathfindingService NPC optimization humanoid performance A star")
 
+    if any(term in lower for term in ["ui", "interfaz", "gui", "startergui", "playergui", "hud", "menu", "boton", "botón"]):
+        queries.append("Roblox UI ScreenGui StarterGui PlayerGui safe area UIScale UITextSizeConstraint mobile touch targets")
+
+    if any(term in lower for term in ["playtest", "test", "prueba", "validar", "logs", "errores"]):
+        queries.append("Roblox Studio testing modes playtest output logs server client validation")
+
+    if any(term in lower for term in ["spawn", "colision", "colisión", "collision", "raycast", "terreno", "terrain", "suelo", "placement", "posicion", "posición"]):
+        queries.append("Roblox raycast overlap bounds collision spawn placement terrain walkability Workspace GetPartBoundsInBox")
+
     expanded = _expand_query_for_rag(query, queries)
     return list(dict.fromkeys(queries + [expanded]))
 

@@ -1,0 +1,32 @@
+{
+  "description": "DeathVoid parts data - touch=true parts kill player on contact. Backdrop is visual only.",
+  "killPlanes": [
+    {"name": "DeathVoid_ZONE 1 - SAFE CARPET RUN_56", "pos": [0, -12.8, 140], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 1 - SAFE CARPET RUN_112", "pos": [0, -12.8, 196], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 2 - WET HALLS_125", "pos": [0, -12.8, 209], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 2 - WET HALLS_181", "pos": [0, -12.8, 265], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 2 - WET HALLS_237", "pos": [0, -12.8, 321], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 3 - BROKEN OFFICES_260", "pos": [0, -12.8, 344], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 3 - BROKEN OFFICES_316", "pos": [0, -12.8, 400], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 3 - BROKEN OFFICES_372", "pos": [0, -12.8, 456], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 4 - EXIT GLOW_410", "pos": [0, -12.8, 494], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 4 - EXIT GLOW_466", "pos": [0, -12.8, 550], "size": [86, 0.3, 62], "touch": true},
+    {"name": "DeathVoid_ZONE 4 - EXIT GLOW_522", "pos": [0, -12.8, 606], "size": [86, 0.3, 62], "touch": true}
+  ],
+  "panels": [
+    {"name": "DeathVoidPanel_2", "pos": [0, -12.8, 140], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_3", "pos": [0, -12.8, 196], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_4", "pos": [0, -12.8, 209], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_5", "pos": [0, -12.8, 265], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_6", "pos": [0, -12.8, 321], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_7", "pos": [0, -12.8, 344], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_8", "pos": [0, -12.8, 400], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_9", "pos": [0, -12.8, 456], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_10", "pos": [0, -12.8, 494], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_11", "pos": [0, -12.8, 550], "size": [86, 0.2, 62], "touch": false},
+    {"name": "DeathVoidPanel_12", "pos": [0, -12.8, 606], "size": [86, 0.2, 62], "touch": false}
+  ],
+  "backdrop": [
+    {"name": "DeathVoid_Backdrop", "pos": [0, -15.8, 343], "size": [199.3, 1.0, 678], "touch": false}
+  ]
+}
