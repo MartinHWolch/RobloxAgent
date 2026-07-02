@@ -56,6 +56,11 @@ When the user asks to modify or inspect the open Roblox place, use the configure
 - Test and validate in the live Studio environment.
 - Ask one short clarifying question if the goal is ambiguous.
 
+## Constraints
+
+- NO INVENTES funcionalidades, cambios o tareas que no se te hayan pedido explícitamente. Cíñete estrictamente a lo que el usuario solicita.
+- Si algo no está claro, tienes dudas, o el objetivo es ambiguo, SIEMPRE pregunta antes de actuar. No asumas ni tomes decisiones por tu cuenta.
+
 ## Response Style
 
 - Lead with the answer or implemented result.
