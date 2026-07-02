@@ -86,6 +86,24 @@ def _rag_search_queries(query: str) -> list[str]:
     if any(term in lower for term in ["spawn", "colision", "colisión", "collision", "raycast", "terreno", "terrain", "suelo", "placement", "posicion", "posición"]):
         queries.append("Roblox raycast overlap bounds collision spawn placement terrain walkability Workspace GetPartBoundsInBox")
 
+    if any(term in lower for term in ["seguridad", "security", "exploit", "anti cheat", "anticheat", "remoteevent", "remotefunction", "onserverevent", "onserverinvoke"]):
+        queries.append("Roblox RemoteEvent RemoteFunction server authoritative validation rate limiting exploit prevention client trust")
+
+    if any(term in lower for term in ["performance", "rendimiento", "lag", "fps", "memoria", "memory", "optimiz", "mobile", "móvil"]):
+        queries.append("Roblox performance optimization mobile memory leaks Heartbeat RenderStepped StreamingEnabled RemoteEvent bandwidth")
+
+    if any(term in lower for term in ["monetiz", "gamepass", "developer product", "devproduct", "processreceipt", "premium", "marketplaceservice", "tienda"]):
+        queries.append("Roblox monetization MarketplaceService GamePass Developer Product ProcessReceipt Premium payouts PolicyService")
+
+    if any(term in lower for term in ["publicar", "publish", "release", "lanzamiento", "checklist", "producción", "production"]):
+        queries.append("Roblox publish checklist DataStore security performance mobile metadata analytics release readiness")
+
+    if any(term in lower for term in ["debug", "debuggear", "error", "stack trace", "traza", "bug", "fallo"]):
+        queries.append("Roblox debugging console output stack trace playtest nil reference type mismatch script errors")
+
+    if any(term in lower for term in ["obby", "tycoon", "simulator", "simulador", "rpg", "horror", "terror", "battle royale", "backrooms"]):
+        queries.append("Roblox game genre patterns obby tycoon simulator RPG horror battle royale scope checklist")
+
     expanded = _expand_query_for_rag(query, queries)
     return list(dict.fromkeys(queries + [expanded]))
 

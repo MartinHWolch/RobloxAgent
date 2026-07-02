@@ -32,3 +32,6 @@ Use the orchestrator only for standalone smoke tests. Inside OpenCode, prefer qu
 - Avoid React Luau, Roact, Rodux, and Reflex unless the user explicitly asks for them.
 - If Roblox Studio MCP tools are available, use them for all live Studio inspection/modification.
 - Cite RAG sources in final answers when giving technical recommendations.
+- For UI/playtest/spatial/before-after verification, use `roblox-agent-workflows`.
+- For security, performance, debug loops, code review, publish readiness, monetization, sharp edges, or genre-specific guidance, use `roblox-agent-audits`.
+- Treat genre templates as optional context, not permission to add unrequested features.

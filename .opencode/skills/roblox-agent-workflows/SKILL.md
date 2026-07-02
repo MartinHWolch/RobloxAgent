@@ -17,6 +17,15 @@ Use this skill to make the agent more reliable when it works inside Roblox Studi
 - Prefer purpose-built Roblox Studio MCP tools over arbitrary Luau. Use `Roblox_Studio_execute_luau` only for checks or actions not covered by existing tools.
 - Do not leave temporary test instances or scripts behind.
 
+## Genre Template Guardrail
+
+Genre templates are optional context, not automatic scope. Use them only to understand common patterns for a requested genre.
+
+- If the user describes a genre, implement only the requested features.
+- Do not add shops, monetization, pets, coins, leaderboards, quests, combat, rebirth, checkpoints, analytics, or external assets unless explicitly requested or confirmed.
+- If a genre decision is necessary to proceed, ask one concise question.
+- Example: for "obby de backrooms con linterna y puertas falsas", build only the backrooms obby elements, flashlight, and fake doors. Do not add a store or skip-stage system unless asked.
+
 ## Before/After Verification
 
 Use for any Studio mutation that touches scripts, UI, scene objects, lighting, terrain, assets, or gameplay state.

@@ -26,6 +26,8 @@ python -m rag query "<user request>" --score -k 8
 
 5. For UI QA, playtest validation, spatial/placement checks, or before/after Studio verification, use the `roblox-agent-workflows` skill. These workflows are project-native; do not integrate or invoke WEPPY.
 
+6. For security audits, performance audits, debug loops, code reviews, publish checklists, monetization reviews, sharp-edge checks, or genre-specific game guidance, use the `roblox-agent-audits` skill. Genre templates are context only, not automatic feature scope.
+
 ## Technical Defaults
 
 - Reply in Spanish unless the user asks otherwise.
@@ -70,6 +72,13 @@ Use these specialized workflows when relevant:
 - UI changes/reviews: follow `roblox-agent-workflows` UI QA.
 - Runtime/script validation: follow `roblox-agent-workflows` Playtest Runner.
 - Object placement, spawns, collisions, terrain, NPC targets: follow `roblox-agent-workflows` Spatial QA.
+- Security/remotes/exploits: follow `roblox-agent-audits` Security Audit.
+- Lag/mobile/memory/network optimization: follow `roblox-agent-audits` Performance Audit.
+- Runtime errors/log debugging: follow `roblox-agent-audits` Debug Loop with a 5-iteration cap.
+- Code review/revision: follow `roblox-agent-audits` Code Review.
+- Release readiness: follow `roblox-agent-audits` Publish Checklist.
+- GamePass/Developer Product/Premium/ad reviews: follow `roblox-agent-audits` Monetization Audit.
+- Obby/tycoon/simulator/RPG/horror/battle royale requests: use genre templates only as optional context and implement only explicitly requested features.
 
 ## Constraints
 
@@ -77,6 +86,7 @@ Use these specialized workflows when relevant:
 - Si algo no está claro, tienes dudas, o el objetivo es ambiguo, SIEMPRE pregunta antes de actuar. No asumas ni tomes decisiones por tu cuenta.
 - No copies ni conectes herramientas externas como WEPPY salvo petición explícita. Puedes recrear ideas útiles con nuestras herramientas existentes si el usuario lo pide.
 - No uses acciones masivas, destructive deletes, asset uploads, compras, DataStore writes, TeleportService, Open Cloud, ni cambios multi-place sin confirmación explícita.
+- No conviertas templates de género en juegos completos salvo que el usuario pida explícitamente un scaffold completo y confirme el alcance.
 
 ## Response Style
 
